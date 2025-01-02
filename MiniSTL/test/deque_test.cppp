@@ -1,0 +1,211 @@
+#ifndef TEST_H
+#define TEST_H
+
+#include "../src/deque.h"
+#include <gtest/gtest.h>
+
+TEST(DequeTest, ConstructorTest){
+    //默认构造函数
+    mydeque<int> l1;
+    EXPECT_EQ(*l1.begin(),0);
+    //初始化容器大小为n，值为默认值
+    mydeque<int> l2(5);
+    EXPECT_EQ(l2[0],0);
+    EXPECT_EQ(l2[4],0);
+    //初始化容器大小为n，值为val
+    mydeque<int> l3(size_t(5),2);
+    EXPECT_EQ(l3[0],2);
+    EXPECT_EQ(l3[4],2);
+    //range构造函数
+    int arr[5]={1,2,3,4,5};
+    mydeque<int> l4(arr,arr+5);
+    EXPECT_EQ(l4[0],1);
+    EXPECT_EQ(l4[2],3);
+    EXPECT_EQ(l4[4],5);
+    //拷贝构造
+    mydeque<int> l5(l4);
+    EXPECT_EQ(l5[0],1);
+    EXPECT_EQ(l5[2],3);
+    EXPECT_EQ(l5[4],5);
+    //移动构造
+    mydeque<int> l6(mystl::move(l4));
+    EXPECT_EQ(l6[0],1);
+    EXPECT_EQ(l6[2],3);
+    EXPECT_EQ(l6[4],5);
+    EXPECT_EQ(l4.size(),0);
+    //initializer_list构造
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_EQ(l7[0],1);
+    EXPECT_EQ(l7[2],3);
+    EXPECT_EQ(l7[4],5);
+}
+TEST(DequeTest, AssignmentTest){
+    mydeque<int> l7{1,2,3,4,5};
+    mydeque<int> tem{10,11};
+    mydeque<int> tem2{21,22};
+    //拷贝赋值
+    l7=tem;
+    auto it=l7.begin();
+    EXPECT_EQ(*it,10);++it;
+    EXPECT_EQ(*it,11);++it;
+    EXPECT_EQ(it,l7.end());
+    //移动赋值
+    l7=mystl::move(tem2);
+    it=l7.begin();
+    EXPECT_EQ(tem2.end().node,nullptr);
+    EXPECT_EQ(*it,21);++it;
+    EXPECT_EQ(*it,22);++it;
+    EXPECT_EQ(it,l7.end());
+}
+TEST(DequeTest, AtTest){
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_EQ(l7.at(0),1);
+    EXPECT_EQ(l7.at(2),3);
+    EXPECT_EQ(l7.at(4),5);
+}
+TEST(DequeTest, BeginEndTest){
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_EQ(*l7.begin(),1);
+    auto it=l7.end();--it;
+    EXPECT_EQ(*it,5);
+}
+TEST(DequeTest, EmptyTest){
+    mydeque<int> emp;
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_TRUE(emp.empty());
+    EXPECT_FALSE(l7.empty());
+}
+TEST(DequeTest, SizeTest){
+    mydeque<int> emp;
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_EQ(emp.size(),0);
+    EXPECT_EQ(l7.size(),5);
+}
+TEST(DequeTest, FrontBackTest){
+    mydeque<int> l7{1,2,3,4,5};
+    EXPECT_EQ(l7.front(),1);
+    EXPECT_EQ(l7.back(),5);
+}
+TEST(DequeTest, AssignTest){
+    mydeque<int> l7{1,2,3,4,5};
+    int arr[7]={7,6,5,4,3,2,1};
+    l7.assign(arr,arr+7);
+    EXPECT_EQ(l7.size(),7);
+    EXPECT_EQ(l7.front(),7);
+    EXPECT_EQ(l7.back(),1);
+    l7.assign(size_t(3),5);
+    EXPECT_EQ(l7.size(),3);
+    EXPECT_EQ(l7.front(),5);
+    EXPECT_EQ(l7.back(),5);
+}
+TEST(DequeTest, ResizeTest){
+    mydeque<int> l7{1,2,3,4,5};
+    //减少size
+    l7.resize(3,1);
+    auto it=l7.begin();
+    EXPECT_EQ(*it,1);++it;++it;
+    EXPECT_EQ(*it,3);++it;
+    EXPECT_EQ(it,l7.end());
+    //增大size
+    l7.resize(4,5);
+    it=l7.begin();
+    EXPECT_EQ(*it,1);++it;
+    EXPECT_EQ(*it,2);++it;
+    EXPECT_EQ(*it,3);++it;
+    EXPECT_EQ(*it,5);++it;
+    EXPECT_EQ(it,l7.end());
+}
+TEST(DequeTest, ShrinkToFitTest){
+    mydeque<int> l7{1,2,3,4,5};
+    for(int i=0;i<100000;++i)
+        l7.push_back(i);
+    l7.shrink_to_fit();
+    EXPECT_EQ(l7.size(),100005);
+}
+TEST(DequeTest, PushFrontBackTest){
+    mydeque<int> l7{1,2,3,4,5};
+    l7.push_front(10);
+    EXPECT_EQ(l7.front(),10);
+    l7.push_back(20);
+    EXPECT_EQ(l7.back(),20);
+}
+TEST(DequeTest, PopFrontBackTest){
+    mydeque<int> l7{1,2,3,4,5};
+    l7.pop_front();
+    EXPECT_EQ(l7.front(),2);
+    l7.pop_back();
+    EXPECT_EQ(l7.back(),4);
+}
+TEST(DequeTest, InsertTest){
+    mydeque<int> l7{1,2,3,4,5};
+    auto it=l7.begin();
+    //在指定位置插入一个新元素
+    l7.insert(it,10);
+    it=l7.begin();
+    EXPECT_EQ(*it,10);
+    //在指定位置插入n个值为val的节点
+    it=l7.begin();
+    l7.insert(it,size_t(2),20);
+    it=l7.begin();
+    EXPECT_EQ(*it,20);
+    ++it;++it;
+    EXPECT_EQ(*it,10);
+    //在指定位置插入range中的元素
+    int arr[3]={30,30,30};
+    it=l7.begin();
+    l7.insert(it,arr,arr+3);
+    it=l7.begin();
+    EXPECT_EQ(*it,30);
+    ++it;++it;++it;
+    EXPECT_EQ(*it,20);
+    //支持 initializer list插入
+    it=l7.begin();
+    l7.insert(it,{40,40});
+    it=l7.begin();
+    EXPECT_EQ(*it,40);
+    ++it;++it;
+    EXPECT_EQ(*it,30);
+}
+TEST(DequeTest, EmplaceFrontBackTest){
+    mydeque<int> l7{1,2,3,4,5};
+    auto it=l7.begin();++it;
+    //emplace
+    l7.emplace(it,30);
+    EXPECT_EQ(*(++(l7.begin())),30);
+    //emplace_front
+    l7.emplace_front(10);
+    EXPECT_EQ(l7.front(),10);
+    //emplace_back
+    l7.emplace_back(20);
+    EXPECT_EQ(l7.back(),20);
+}
+TEST(DequeTest, EraseTest){
+    mydeque<int> l7{1,2,3,4,5};
+    auto it=l7.begin();
+    //删除pos处的元素
+    l7.erase(it);
+    it=l7.begin();
+    EXPECT_EQ(*it,2);
+    //删除range中的元素
+    it=l7.begin();++it;
+    auto it2=l7.end();
+    l7.erase(it,it2);
+    it=l7.begin();
+    EXPECT_EQ(*it,2);++it;
+    EXPECT_EQ(it,l7.end());
+}
+TEST(DequeTest, ClearTest){
+    mydeque<int> l7{1,2,3,4,5};
+    l7.clear();
+    EXPECT_EQ(l7.size(),0);
+}
+TEST(DequeTest, SwapTest){
+    mydeque<int> oth{10,11};
+    mydeque<int> l7{1,2,3,4,5};
+    l7.swap(oth);
+    EXPECT_EQ(l7.front(),10);
+    EXPECT_EQ(oth.front(),1);
+}
+
+
+#endif

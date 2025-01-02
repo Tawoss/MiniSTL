@@ -1,0 +1,268 @@
+#ifndef TEST_H
+#define TEST_H
+
+#include "../src/multimap.h"
+#include <gtest/gtest.h>
+
+TEST(MultiMapTest, ConstructorTest){
+    //默认构造
+    my_multimap<char,int> l1;
+    EXPECT_EQ(l1.size(),0);
+    //range构造函数
+    std::pair<char,int> arr[6]={mystl::make_pair('a',100),mystl::make_pair('b',200),
+                                mystl::make_pair('b',200),mystl::make_pair('c',300),
+                                mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    my_multimap<char,int> l2(arr,arr+6);
+    EXPECT_EQ(l2.size(),6);
+    auto it=l2.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l2.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+    //拷贝构造
+    my_multimap<char,int> l3(l2);
+    EXPECT_EQ(l3.size(),6);
+    it=l3.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l3.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+    //移动构造
+    my_multimap<char,int> l4(mystl::move(l2));
+    EXPECT_EQ(l2.size(),0);
+    EXPECT_EQ(l4.size(),6);
+    it=l4.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l4.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+    //initializer list构造
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                            mystl::make_pair('b',200),mystl::make_pair('c',300),
+                            mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    EXPECT_EQ(l5.size(),6);
+    it=l5.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l5.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+}
+TEST(MultiMapTest, AssignmentTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    my_multimap<char,int> tem{mystl::make_pair('x',2400),mystl::make_pair('y',2500)};
+    my_multimap<char,int> tem2{mystl::make_pair('u',2100),mystl::make_pair('v',2200),mystl::make_pair('w',2300)};
+    //拷贝赋值
+    l5=tem;
+    auto it=l5.begin();
+    EXPECT_EQ((*it).first,'x');
+    EXPECT_EQ((*it).second,2400);
+    ++it;
+    EXPECT_EQ((*it).first,'y');
+    EXPECT_EQ((*it).second,2500);
+    //移动赋值
+    l5=mystl::move(tem2);
+    EXPECT_EQ(tem2.size(),0);
+    EXPECT_EQ(l5.size(),3);
+    it=l5.begin();
+    EXPECT_EQ((*it).first,'u');
+    EXPECT_EQ((*it).second,2100);
+    ++it;
+    EXPECT_EQ((*it).first,'v');
+    EXPECT_EQ((*it).second,2200);
+    ++it;
+    EXPECT_EQ((*it).first,'w');
+    EXPECT_EQ((*it).second,2300);
+}
+TEST(MultiMapTest, BeginEndTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    auto it=l5.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l5.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+}
+TEST(MultiMapTest, EmptyTest){
+    my_multimap<char,int> emp;
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    EXPECT_TRUE(emp.empty());
+    EXPECT_FALSE(l5.empty());
+
+}
+TEST(MultiMapTest, SizeTest){
+    my_multimap<char,int> l4{mystl::make_pair('a',100)};
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                            mystl::make_pair('b',200),mystl::make_pair('c',300),
+                            mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    EXPECT_EQ(l4.size(),1);
+    EXPECT_EQ(l5.size(),6);
+}
+TEST(MultiMapTest, FindTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                            mystl::make_pair('b',200),mystl::make_pair('c',300),
+                            mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    auto it=l5.find('c');
+    EXPECT_EQ((*it).first,'c');
+    EXPECT_EQ((*it).second,300);
+    it=l5.find('f');
+    EXPECT_EQ(it,l5.end());
+}
+TEST(MultiMapTest, LowerUpperBoundTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                            mystl::make_pair('b',200),mystl::make_pair('c',300),
+                            mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    auto it=l5.lower_bound('b');
+    EXPECT_EQ((*it).first,'b');
+    EXPECT_EQ((*it).second,200);
+
+    it=l5.lower_bound('c');
+    EXPECT_EQ((*it).first,'c');
+    EXPECT_EQ((*it).second,300);
+    it=l5.lower_bound('f');
+    EXPECT_EQ(it,l5.end());
+
+    it=l5.upper_bound('b');
+    EXPECT_EQ((*it).first,'c');
+    EXPECT_EQ((*it).second,300);
+
+    it=l5.upper_bound('c');
+    EXPECT_EQ((*it).first,'d');
+    EXPECT_EQ((*it).second,400);
+    it=l5.upper_bound('e');
+    EXPECT_EQ(it,l5.end());
+}
+TEST(MultiMapTest, EqualRangeTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    auto it=l5.equal_range('b');
+    EXPECT_EQ((*(it.first)).first,'b');
+    EXPECT_EQ((*(it.first)).second,200);
+    EXPECT_EQ((*(it.second)).first,'c');
+    EXPECT_EQ((*(it.second)).second,300);
+
+    it=l5.equal_range('e');
+    //std::cout<<(*(it.second)).second<<std::endl;
+    EXPECT_EQ((*(it.first)).first,'e');
+    EXPECT_EQ((*(it.first)).second,500);
+    EXPECT_EQ(it.second,l5.end());
+
+}
+TEST(MultiMapTest, InsertTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    //插入值为val的节点
+    l5.insert(mystl::make_pair('g',700));
+    auto it=l5.find('g');
+    EXPECT_EQ(l5.size(),7);
+    EXPECT_EQ((*it).first,'g');
+    EXPECT_EQ((*it).second,700);
+    //给定插入位置在pos附近
+    l5.insert(--l5.end(),mystl::make_pair('f',600));
+    it=l5.find('f');
+    EXPECT_EQ(l5.size(),8);
+    EXPECT_EQ((*it).first,'f');
+    EXPECT_EQ((*it).second,600);
+    //给定range插入
+    std::pair<char,int> arr[3]={mystl::make_pair('h',800),mystl::make_pair('i',900),
+                                mystl::make_pair('k',1100)};
+    l5.insert(arr,arr+3);
+    EXPECT_EQ(l5.size(),11);
+    it=l5.find('h');
+    EXPECT_EQ((*it).first,'h');
+    EXPECT_EQ((*it).second,800);
+    it=l5.find('i');
+    EXPECT_EQ((*it).first,'i');
+    EXPECT_EQ((*it).second,900);
+    it=l5.find('k');
+    EXPECT_EQ((*it).first,'k');
+    EXPECT_EQ((*it).second,1100);
+    //initializer_list插入
+    l5.insert({mystl::make_pair('i',900),mystl::make_pair('j',1000),mystl::make_pair('l',1200)});
+    EXPECT_EQ(l5.size(),14);
+    it=l5.find('i');
+    EXPECT_EQ((*it).first,'i');
+    EXPECT_EQ((*it).second,900);
+    it=l5.find('j');
+    EXPECT_EQ((*it).first,'j');
+    EXPECT_EQ((*it).second,1000);
+    it=l5.find('l');
+    EXPECT_EQ((*it).first,'l');
+    EXPECT_EQ((*it).second,1200);
+}
+TEST(MultiMapTest, AccessOperatorTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    EXPECT_EQ(l5.size(),6);
+    auto it=l5.begin();
+    EXPECT_EQ((*it).first,'a');
+    EXPECT_EQ((*it).second,100);
+    it=l5.end();--it;
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+}
+TEST(MultiMapTest, EraseTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    //删除迭代器所指位置节点
+    auto it=l5.begin();
+    l5.erase(it);
+    it=l5.begin();
+    EXPECT_EQ(l5.size(),5);
+    EXPECT_EQ((*it).first,'b');
+    EXPECT_EQ((*it).second,200);
+    //删除容器中键值为val的节点
+    l5.erase('b');
+    it=l5.begin();
+    EXPECT_EQ(l5.size(),3);
+    EXPECT_EQ((*it).first,'c');
+    EXPECT_EQ((*it).second,300);
+    //删除range中迭代器所指节点
+    it=l5.begin();++it;++it;
+    l5.erase(l5.begin(),it);
+    it=l5.begin();
+    EXPECT_EQ(l5.size(),1);
+    EXPECT_EQ((*it).first,'e');
+    EXPECT_EQ((*it).second,500);
+}
+TEST(MultiMapTest, ClearTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    l5.clear();
+    EXPECT_EQ(l5.size(),0);
+}
+TEST(MultiMapTest, SwapTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    my_multimap<char,int> oth{mystl::make_pair('x',2400),mystl::make_pair('y',2500)};
+    l5.swap(oth);
+    EXPECT_EQ((*l5.begin()).first,'x');
+    EXPECT_EQ((*l5.begin()).second,2400);
+    EXPECT_EQ((*oth.begin()).first,'a');
+    EXPECT_EQ((*oth.begin()).second,100);
+}
+TEST(MultiMapTest, CountTest){
+    my_multimap<char,int> l5{mystl::make_pair('a',100),mystl::make_pair('b',200),
+                        mystl::make_pair('b',200),mystl::make_pair('c',300),
+                        mystl::make_pair('d',400),mystl::make_pair('e',500)};
+    EXPECT_EQ(1,l5.count('a'));
+    EXPECT_EQ(2,l5.count('b'));
+    EXPECT_EQ(0,l5.count('x'));
+}
+
+#endif

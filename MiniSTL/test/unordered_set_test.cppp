@@ -1,0 +1,83 @@
+#ifndef TEST_H
+#define TEST_H
+
+#include "../src/unordered_set.h"
+#include <gtest/gtest.h>
+
+TEST(UnorderedSetTest, ConstructorTest){
+    //默认构造函数
+    myunordered_set<int> l1;
+    EXPECT_EQ(l1.size(),0);
+    //range构造函数
+    int arr[5]={1,2,3,4,102};
+    myunordered_set<int> l4(arr,arr+5);
+    auto it=l4.find(1);
+    EXPECT_EQ(*it,1);++it;
+    EXPECT_EQ(*it,102);++it;
+    EXPECT_EQ(it,l4.end());
+    //拷贝构造
+    myunordered_set<int> l5(l4);
+    it=l5.begin();
+    EXPECT_EQ(*it,1);++it;
+    EXPECT_EQ(*it,2);++it;
+    EXPECT_EQ(*it,3);++it;
+    EXPECT_EQ(*it,4);++it;
+    EXPECT_EQ(it,l5.end());
+    //移动构造
+    myunordered_set<int> l6(mystl::move(l4));
+    it=l6.begin();
+    EXPECT_EQ(*it,1);++it;
+    EXPECT_EQ(*it,2);++it;
+    EXPECT_EQ(*it,3);++it;
+    EXPECT_EQ(*it,4);++it;
+    EXPECT_EQ(it,l6.end());
+    EXPECT_EQ(l4.size(),0);
+    //initializer_list构造
+    myunordered_set<int> l7{1,2,3,4,5};
+    it=l7.begin();
+
+}
+TEST(UnorderedSetTest, AssignmentTest){
+
+}
+TEST(UnorderedSetTest, BeginEndTest){
+
+}
+TEST(UnorderedSetTest, SizeTest){
+
+}
+TEST(UnorderedSetTest, EmptyTest){
+
+}
+TEST(UnorderedSetTest, FindTest){
+
+}
+TEST(UnorderedSetTest, EqualRangeTest){
+
+}
+TEST(UnorderedSetTest, EmplaceTest){
+
+}
+TEST(UnorderedSetTest, InsertTest){
+
+}
+TEST(UnorderedSetTest, EraseTest){
+
+}
+TEST(UnorderedSetTest, ClearTest){
+
+}
+TEST(UnorderedSetTest, SwapTest){
+
+}
+TEST(UnorderedSetTest, BucketCountTest){
+
+}
+TEST(UnorderedSetTest, BucketSizeTest){
+
+}
+TEST(UnorderedSetTest, BucketTest){
+
+}
+
+#endif

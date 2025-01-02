@@ -1,0 +1,285 @@
+#ifndef TEST_H
+#define TEST_H
+
+#include "../src/forward_list.h"
+#include <gtest/gtest.h>
+//#include <forward_list>
+TEST(ForwardListTest, ConstructorTest){
+    //默认构造函数
+    myflist<int> fl1;
+    EXPECT_EQ(fl1.begin(),nullptr);
+    //初始化容器大小为n，值为默认值
+    myflist<int> fl2(5);
+    auto it=fl2.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl2.begin(),0);
+    EXPECT_EQ(it.node->next,nullptr);
+    //初始化容器大小为n，值为val
+    myflist<int> fl3(size_t(5),2);
+    it=fl3.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl3.begin(),2);
+    EXPECT_EQ(it.node->next,nullptr);
+    //range构造函数
+    int arr[5]={1,2,3,4,5};
+    myflist<int> fl4(arr,arr+5);
+    it=fl4.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl4.begin(),1);
+    EXPECT_EQ(*it,5);
+    EXPECT_EQ(it.node->next,nullptr);
+    //拷贝构造
+    myflist<int> fl5(fl4);
+    it=fl5.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl5.begin(),1);
+    EXPECT_EQ(*it,5);
+    EXPECT_EQ(it.node->next,nullptr);
+    //移动构造
+    myflist<int> fl6(mystl::move(fl4));
+    it=fl6.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl6.begin(),1);
+    EXPECT_EQ(*it,5);
+    EXPECT_EQ(it.node->next,nullptr);
+    EXPECT_EQ(fl4.cbefore_begin().node,nullptr);
+    //initializer_list构造
+    myflist<int> fl7{1,2,3,4,5};
+    it=fl7.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl7.begin(),1);
+    EXPECT_EQ(*it,5);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, AssignmentTest){
+    myflist<int> fl7{1,2,3,4,5};
+    myflist<int> tem{10,11};
+    myflist<int> tem2{21,22};
+    //拷贝赋值
+    fl7=tem;
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,10);++it;
+    EXPECT_EQ(*it,11);
+    EXPECT_EQ(it.node->next,nullptr);
+    //移动赋值
+    fl7=mystl::move(tem2);
+    it=fl7.begin();
+    EXPECT_EQ(tem2.cbefore_begin().node,nullptr);
+    EXPECT_EQ(*it,21);++it;
+    EXPECT_EQ(*it,22);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, BeginEndTest){
+    myflist<int> fl7{1,2,3,4,5};
+    auto it=fl7.begin();
+    for(int i=0;i<4;++i)
+        ++it;
+    EXPECT_EQ(*fl7.begin(),1);
+    EXPECT_EQ(*it,5);
+    EXPECT_EQ(fl7.end().node,nullptr);
+    EXPECT_EQ(it.node->next,nullptr);
+
+}
+TEST(ForwardListTest, EmptyTest){
+    myflist<int> emp;
+    myflist<int> fl7{1,2,3,4,5};
+    EXPECT_TRUE(emp.empty());
+    EXPECT_FALSE(fl7.empty());
+}
+TEST(ForwardListTest, FrontTest){
+    myflist<int> fl7{1,2,3,4,5};
+    EXPECT_EQ(fl7.front(),1);
+}
+TEST(ForwardListTest, AssignTest){
+    myflist<int> fl7{1,2,3,4,5};
+    int arr[7]={7,6,5,4,3,2,1};
+    fl7.assign(arr,arr+7);
+    EXPECT_EQ(fl7.front(),7);
+    auto it=fl7.begin();
+    for(int i=0;i<6;++i)
+        ++it;
+    EXPECT_EQ(*it,1);
+}
+TEST(ForwardListTest, PushPopFrontTest){
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.push_front(10);
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,10);
+    fl7.pop_front();
+    it=fl7.begin();
+    EXPECT_EQ(*it,1);
+}
+TEST(ForwardListTest, EmplaceFrontAfterTest){
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.emplace_front(10);
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,10);
+    it=fl7.begin();++it;
+    fl7.emplace_after(it,20);
+    it=fl7.begin();++it;++it;
+    EXPECT_EQ(*it,20);
+}
+TEST(ForwardListTest, InsertAfterTest){
+    myflist<int> fl7{1,2,3,4,5};
+    auto it=fl7.begin();
+    //在指定位置之后插入一个新元素
+    fl7.insert_after(it,10);
+    it=fl7.begin();++it;
+    EXPECT_EQ(*it,10);
+    //在指定位置之后插入n个值为val的节点
+    it=fl7.begin();
+    fl7.insert_after(it,size_t(2),20);
+    it=fl7.begin();++it;
+    EXPECT_EQ(*it,20);
+    ++it;++it;
+    EXPECT_EQ(*it,10);
+    //在指定位置插入range中的元素
+    int arr[3]={30,30,30};
+    it=fl7.begin();
+    fl7.insert_after(it,arr,arr+3);
+    it=fl7.begin();++it;
+    EXPECT_EQ(*it,30);
+    ++it;++it;++it;
+    EXPECT_EQ(*it,20);
+    //支持 initializer list插入
+    it=fl7.begin();
+    fl7.insert_after(it,{40,40});
+    it=fl7.begin();++it;
+    EXPECT_EQ(*it,40);
+    ++it;++it;
+    EXPECT_EQ(*it,30);
+}
+TEST(ForwardListTest, EraseAfterTest){
+    myflist<int> fl7{1,2,3,4,5};
+    auto it=fl7.cbefore_begin();
+    //删除pos处后一个位置的元素
+    fl7.erase_after(it);
+    it=fl7.begin();
+    EXPECT_EQ(*it,2);
+    //删除(pos,last)中的元素(2,5)
+    auto it2=it; ++it2;++it2;++it2;
+    fl7.erase_after(it,it2);
+    it=fl7.begin();
+    EXPECT_EQ(*it,2);
+    EXPECT_EQ(*(++it),5);
+}
+TEST(ForwardListTest, ClearTest){
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.clear();
+    auto it=fl7.cbefore_begin();
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, ResizeTest){
+    myflist<int> fl7{1,2,3,4,5};
+    //减少size
+    fl7.resize(3,1);
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,1);
+    ++it;++it;
+    EXPECT_EQ(*it,3);
+    EXPECT_EQ(it.node->next,nullptr);
+    //增大size
+    fl7.resize(4,5);
+    ++it;
+    EXPECT_EQ(*it,5);
+}
+TEST(ForwardListTest, SwapTest){
+    myflist<int> oth{10,11};
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.swap(oth);
+    EXPECT_EQ(fl7.front(),10);
+    EXPECT_EQ(oth.front(),1);
+}
+TEST(ForwardListTest, SpliceAfterTest){
+    myflist<int> oth{10,11};
+    myflist<int> fl7{1,2,3,4,5};
+    auto it=fl7.before_begin();
+    //把整个other list移动到pos处
+    fl7.splice_after(it,oth);
+    ++it;
+    EXPECT_EQ(*it,10);
+    ++it;++it;
+    EXPECT_EQ(*it,1);
+    //把迭代器i所指的节点移动到pos处
+    it=fl7.begin();
+    auto it2=oth.cbefore_begin();
+    oth.splice_after(it2,fl7,it);
+    it2=oth.begin(); it=fl7.begin();
+    EXPECT_EQ(*it2,10);
+    EXPECT_EQ(*it,11);
+    //把迭代器first～last范围中的节点移动到pos处
+    it=fl7.cbefore_begin(); it2=oth.cbefore_begin();
+    auto itl=it; ++itl;++itl;++itl;++itl;++itl;++itl;++itl;
+    oth.splice_after(it2,fl7,it,itl);
+    it2=oth.begin(); it=fl7.cbefore_begin();
+    EXPECT_EQ(*it2,11);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, RemoveTest){
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.remove(1);
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,2);
+    fl7.remove_if( [](int x) ->bool {return x>3;});
+    it=fl7.begin();
+    EXPECT_EQ(*it,2);++it;
+    EXPECT_EQ(*it,3);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, UniqueTest){
+    myflist<int> fl7{1,1,2,2};
+    fl7.unique();
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,1);++it;
+    EXPECT_EQ(*it,2);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, MergeTest){
+    myflist<int> fl7{2,5,7};
+    myflist<int> fl8{1,4,6,8,10};
+    fl7.merge(fl8);
+    auto it=fl7.begin();
+    EXPECT_EQ(fl8.cbefore_begin().node->next,nullptr);
+    EXPECT_EQ(*it,1);
+    ++it;++it;++it;++it;++it;++it;++it;
+    EXPECT_EQ(*it,10);
+    EXPECT_EQ(it.node->next,nullptr);
+}
+TEST(ForwardListTest, SortTest){
+    myflist<int> fl7{6,5,8,4,5,7};
+    fl7.sort();
+    auto it=fl7.begin();
+    EXPECT_EQ(*it,4);++it;
+    EXPECT_EQ(*it,5);++it;
+    EXPECT_EQ(*it,5);++it;
+    EXPECT_EQ(*it,6);++it;
+    EXPECT_EQ(*it,7);++it;
+    EXPECT_EQ(*it,8);
+    myflist<int> fl8{1,5,4,2,3,5};
+    fl8.sort([](int x, int y)->bool { return !(x<y); });
+    auto it2=fl8.begin();
+    EXPECT_EQ(*it2,5);++it2;
+    EXPECT_EQ(*it2,5);++it2;
+    EXPECT_EQ(*it2,4);++it2;
+    EXPECT_EQ(*it2,3);++it2;
+    EXPECT_EQ(*it2,2);++it2;
+    EXPECT_EQ(*it2,1);
+}
+TEST(ForwardListTest, ReverseTest){
+    myflist<int> fl7{1,2,3,4,5};
+    fl7.reverse();
+    auto it2=fl7.begin();
+    EXPECT_EQ(*it2,5);++it2;
+    EXPECT_EQ(*it2,4);++it2;
+    EXPECT_EQ(*it2,3);++it2;
+    EXPECT_EQ(*it2,2);++it2;
+    EXPECT_EQ(*it2,1);
+}
+
+#endif
